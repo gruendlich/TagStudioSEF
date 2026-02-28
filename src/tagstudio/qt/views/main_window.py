@@ -594,13 +594,6 @@ class MainWindow(QMainWindow):
         self.search_settings_menu = QMenu(self.search_settings_button)
         self.search_settings_button.setMenu(self.search_settings_menu)
 
-        self.extra_input_layout.addWidget(self.search_settings_button)
-
-        ## Spacer
-        self.extra_input_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        )
-
         ## Show hidden entries checkbox
         # Hidden logic-only checkbox to maintain compatibility with controller
         self.show_hidden_entries_checkbox = QCheckBox()
@@ -657,7 +650,17 @@ class MainWindow(QMainWindow):
         self.thumb_size_combobox.setSizePolicy(size_policy)
         self.thumb_size_combobox.setMinimumWidth(128)
         self.thumb_size_combobox.setMaximumWidth(352)
+
         self.extra_input_layout.addWidget(self.thumb_size_combobox)
+
+        ## Spacer
+        self.extra_input_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        )
+
+        ## Search Settings Button
+        self.extra_input_layout.addWidget(self.search_settings_button)
+
         for size in MainWindow.THUMB_SIZES:
             self.thumb_size_combobox.addItem(size[0], size[1])
         self.thumb_size_combobox.setCurrentIndex(2)  # Default: Medium
