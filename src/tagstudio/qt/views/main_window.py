@@ -33,6 +33,7 @@ from PySide6.QtWidgets import (
     QStatusBar,
     QVBoxLayout,
     QWidget,
+    QWidgetAction,
 )
 
 from tagstudio.core.enums import ShowFilepathOption
@@ -587,62 +588,47 @@ class MainWindow(QMainWindow):
         highlight_color = get_highlight_color(primary_color)
         text_color: QColor = get_text_color(primary_color, highlight_color)
 
-        ## Show hidden entries checkbox
-        self.show_hidden_entries_widget = QWidget()
-        self.show_hidden_entries_layout = QHBoxLayout(self.show_hidden_entries_widget)
-        self.show_hidden_entries_layout.setStretch(1, 1)
-        self.show_hidden_entries_layout.setContentsMargins(0, 0, 0, 0)
-        self.show_hidden_entries_layout.setSpacing(6)
-        self.show_hidden_entries_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.show_hidden_entries_title = QLabel(Translations["home.show_hidden_entries"])
-        self.show_hidden_entries_checkbox = QCheckBox()
-        self.show_hidden_entries_checkbox.setFixedSize(22, 22)
+        ## Search Settings Dropdown Button
+        self.search_settings_button = QPushButton(Translations["home.search_settings"], self.central_widget)
+        self.search_settings_button.setObjectName("search_settings_button")
+        self.search_settings_menu = QMenu(self.search_settings_button)
+        self.search_settings_button.setMenu(self.search_settings_menu)
 
-        self.show_hidden_entries_checkbox.setStyleSheet(
-            f"QCheckBox{{"
-            f"background: rgba{primary_color.toTuple()};"
-            f"color: rgba{text_color.toTuple()};"
-            f"border-color: rgba{border_color.toTuple()};"
-            f"border-radius: 6px;"
-            f"border-style:solid;"
-            f"border-width: 2px;"
-            f"}}"
-            f"QCheckBox::indicator{{"
-            f"width: 10px;"
-            f"height: 10px;"
-            f"border-radius: 2px;"
-            f"margin: 4px;"
-            f"}}"
-            f"QCheckBox::indicator:checked{{"
-            f"background: rgba{text_color.toTuple()};"
-            f"}}"
-            f"QCheckBox::hover{{"
-            f"border-color: rgba{highlight_color.toTuple()};"
-            f"}}"
-            f"QCheckBox::focus{{"
-            f"border-color: rgba{highlight_color.toTuple()};"
-            f"outline:none;"
-            f"}}"
-        )
-
-        self.show_hidden_entries_checkbox.setChecked(False)  # Default: No
-
-        self.show_hidden_entries_layout.addWidget(self.show_hidden_entries_checkbox)
-        self.show_hidden_entries_layout.addWidget(self.show_hidden_entries_title)
-
-        self.extra_input_layout.addWidget(self.show_hidden_entries_widget)
+        self.extra_input_layout.addWidget(self.search_settings_button)
 
         ## Spacer
         self.extra_input_layout.addItem(
             QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         )
 
+        ## Show hidden entries checkbox
+        # Hidden logic-only checkbox to maintain compatibility with controller
+        self.show_hidden_entries_checkbox = QCheckBox()
+        self.show_hidden_entries_checkbox.setChecked(False)  # Default: No
+        self.show_hidden_entries_checkbox.hide()
+
+        # The actual UI checkable action inside the Search Settings Menu
+        self.show_hidden_entries_action = QAction(Translations["home.show_hidden_entries"], self.central_widget)
+        self.show_hidden_entries_action.setCheckable(True)
+        self.show_hidden_entries_action.setChecked(False)
+
+        # Dual-binding to keep the hidden checkbox perfectly synced with the menu action
+        self.show_hidden_entries_action.toggled.connect(self.show_hidden_entries_checkbox.setChecked)
+        self.show_hidden_entries_checkbox.toggled.connect(self.show_hidden_entries_action.setChecked)
+
+        self.search_settings_menu.addAction(self.show_hidden_entries_action)
+        self.search_settings_menu.addSeparator()
+
+
         ## Sorting Mode Dropdown
         self.sorting_mode_combobox = QComboBox(self.central_widget)
         self.sorting_mode_combobox.setObjectName("sorting_mode_combobox")
         for sort_mode in SortingModeEnum:
             self.sorting_mode_combobox.addItem(Translations[sort_mode.value], sort_mode)
-        self.extra_input_layout.addWidget(self.sorting_mode_combobox)
+            
+        self.sorting_mode_action = QWidgetAction(self)
+        self.sorting_mode_action.setDefaultWidget(self.sorting_mode_combobox)
+        self.search_settings_menu.addAction(self.sorting_mode_action)
 
         ## Sorting Direction Dropdown
         self.sorting_direction_combobox = QComboBox(self.central_widget)
@@ -654,7 +640,10 @@ class MainWindow(QMainWindow):
             Translations["sorting.direction.descending"], userData=False
         )
         self.sorting_direction_combobox.setCurrentIndex(1)  # Default: Descending
-        self.extra_input_layout.addWidget(self.sorting_direction_combobox)
+        
+        self.sorting_direction_action = QWidgetAction(self)
+        self.sorting_direction_action.setDefaultWidget(self.sorting_direction_combobox)
+        self.search_settings_menu.addAction(self.sorting_direction_action)
 
         ## Thumbnail Size placeholder
         self.thumb_size_combobox = QComboBox(self.central_widget)
