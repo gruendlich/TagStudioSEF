@@ -1,0 +1,398 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.8, pytest-8.3.5, pluggy-1.6.0 -- /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/.venv/bin/python3.12
+cachedir: .pytest_cache
+PySide6 6.8.0.2 -- Qt runtime 6.8.0 -- Qt compiled 6.8.0
+rootdir: /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF
+configfile: pyproject.toml
+plugins: qt-4.4.0, syrupy-4.9.1, cov-6.1.1
+collecting ... collected 231 items
+
+tests/macros/test_dupe_files.py::test_refresh_dupe_files PASSED          [  0%]
+tests/macros/test_folders_tags.py::test_folders_to_tags PASSED           [  0%]
+tests/macros/test_missing_files.py::test_refresh_missing_files[library0] PASSED [  1%]
+tests/macros/test_refresh_dir.py::test_refresh_new_files[library0-True] PASSED [  1%]
+tests/macros/test_refresh_dir.py::test_refresh_new_files[library0-False] PASSED [  2%]
+tests/macros/test_refresh_dir.py::test_refresh_multi_byte_filenames[library0] PASSED [  2%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_add_sub_tag_callback PASSED [  3%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_remove_subtag_callback PASSED [  3%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_add_alias_callback PASSED [  3%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_remove_alias_callback PASSED [  4%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_set_parent_tags PASSED [  4%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_add_aliases PASSED [  5%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_set_aliases PASSED [  5%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_set_tag PASSED    [  6%]
+tests/qt/test_build_tag_panel.py::test_build_tag_panel_build_tag PASSED  [  6%]
+tests/qt/test_field_containers.py::test_update_selection_empty PASSED    [  6%]
+tests/qt/test_field_containers.py::test_update_selection_single PASSED   [  7%]
+tests/qt/test_field_containers.py::test_update_selection_multiple PASSED [  7%]
+tests/qt/test_field_containers.py::test_add_tag_to_selection_single PASSED [  8%]
+tests/qt/test_field_containers.py::test_add_same_tag_to_selection_single PASSED [  8%]
+tests/qt/test_field_containers.py::test_add_tag_to_selection_multiple PASSED [  9%]
+tests/qt/test_field_containers.py::test_meta_tag_category PASSED         [  9%]
+tests/qt/test_field_containers.py::test_custom_tag_category PASSED       [  9%]
+tests/qt/test_file_path_options.py::test_filepath_setting[0] PASSED      [ 10%]
+tests/qt/test_file_path_options.py::test_filepath_setting[1] PASSED      [ 10%]
+tests/qt/test_file_path_options.py::test_filepath_setting[2] PASSED      [ 11%]
+tests/qt/test_file_path_options.py::test_file_path_display[ShowFilepathOption.SHOW_FULL_PATHS-<lambda>] PASSED [ 11%]
+tests/qt/test_file_path_options.py::test_file_path_display[ShowFilepathOption.SHOW_RELATIVE_PATHS-<lambda>] PASSED [ 12%]
+tests/qt/test_file_path_options.py::test_file_path_display[ShowFilepathOption.SHOW_FILENAMES_ONLY-<lambda>] PASSED [ 12%]
+tests/qt/test_file_path_options.py::test_title_update[0-<lambda>] PASSED [ 12%]
+tests/qt/test_file_path_options.py::test_title_update[1-<lambda>] PASSED [ 13%]
+tests/qt/test_file_path_options.py::test_title_update[2-<lambda>] PASSED [ 13%]
+tests/qt/test_flow_widget.py::test_flow_layout_happy_path PASSED         [ 14%]
+tests/qt/test_folders_to_tags.py::test_generate_preview_data PASSED      [ 14%]
+tests/qt/test_global_settings.py::test_read_settings PASSED              [ 15%]
+tests/qt/test_item_thumb.py::test_badge_visual_state[True] PASSED        [ 15%]
+tests/qt/test_item_thumb.py::test_badge_visual_state[False] PASSED       [ 16%]
+tests/qt/test_preview_panel.py::test_update_selection_empty PASSED       [ 16%]
+tests/qt/test_preview_panel.py::test_update_selection_single PASSED      [ 16%]
+tests/qt/test_preview_panel.py::test_update_selection_multiple PASSED    [ 17%]
+tests/qt/test_qt_driver.py::test_browsing_state_update PASSED            [ 17%]
+tests/qt/test_qt_driver.py::test_close_library PASSED                    [ 18%]
+tests/qt/test_resource_manager.py::test_get PASSED                       [ 18%]
+tests/qt/test_tag_panel.py::test_tag_panel PASSED                        [ 19%]
+tests/qt/test_tag_panel.py::test_add_tag_callback PASSED                 [ 19%]
+tests/qt/test_tag_search_panel.py::test_update_tags PASSED               [ 19%]
+tests/qt/test_tag_search_panel.py::test_tag_widget_actions_replaced_correctly PASSED [ 20%]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_6] PASSED [ 20%]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_7] PASSED [ 21%]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_8] PASSED [ 21%]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_9] PASSED [ 22%]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_100] PASSED [ 22%]
+tests/test_driver.py::test_evaluate_path_empty PASSED                    [ 22%]
+tests/test_driver.py::test_evaluate_path_missing PASSED                  [ 23%]
+tests/test_driver.py::test_evaluate_path_last_lib_not_exists PASSED      [ 23%]
+tests/test_driver.py::test_evaluate_path_last_lib_present PASSED         [ 24%]
+tests/test_json_migration.py::test_json_migration 2026-02-28 09:48:31 [info     ] Parity check complete!
+PASSED                 [ 24%]
+tests/test_library.py::test_library_add_alias PASSED                     [ 25%]
+tests/test_library.py::test_library_get_alias PASSED                     [ 25%]
+tests/test_library.py::test_library_update_alias PASSED                  [ 25%]
+tests/test_library.py::test_library_add_file[library0] PASSED            [ 26%]
+tests/test_library.py::test_create_tag PASSED                            [ 26%]
+tests/test_library.py::test_tag_self_parent PASSED                       [ 27%]
+tests/test_library.py::test_library_search PASSED                        [ 27%]
+tests/test_library.py::test_tag_search PASSED                            [ 28%]
+tests/test_library.py::test_get_entry PASSED                             [ 28%]
+tests/test_library.py::test_entries_count PASSED                         [ 29%]
+tests/test_library.py::test_parents_add PASSED                           [ 29%]
+tests/test_library.py::test_remove_tag PASSED                            [ 29%]
+tests/test_library.py::test_search_library_case_insensitive PASSED       [ 30%]
+tests/test_library.py::test_preferences PASSED                           [ 30%]
+tests/test_library.py::test_remove_entry_field PASSED                    [ 31%]
+tests/test_library.py::test_remove_field_entry_with_multiple_field PASSED [ 31%]
+tests/test_library.py::test_update_entry_field PASSED                    [ 32%]
+tests/test_library.py::test_update_entry_with_multiple_identical_fields PASSED [ 32%]
+tests/test_library.py::test_mirror_entry_fields PASSED                   [ 32%]
+tests/test_library.py::test_merge_entries PASSED                         [ 33%]
+tests/test_library.py::test_remove_tags_from_entries PASSED              [ 33%]
+tests/test_library.py::test_search_entry_id[1-1_0] PASSED                [ 34%]
+tests/test_library.py::test_search_entry_id[1-1_1] PASSED                [ 34%]
+tests/test_library.py::test_search_entry_id[xxx-0] PASSED                [ 35%]
+tests/test_library.py::test_search_entry_id[222-0] PASSED                [ 35%]
+tests/test_library.py::test_update_field_order PASSED                    [ 35%]
+tests/test_library.py::test_library_prefs_multiple_identical_vals PASSED [ 36%]
+tests/test_library.py::test_path_search_ilike PASSED                     [ 36%]
+tests/test_library.py::test_path_search_like PASSED                      [ 37%]
+tests/test_library.py::test_path_search_default_with_sep PASSED          [ 37%]
+tests/test_library.py::test_path_search_glob_after PASSED                [ 38%]
+tests/test_library.py::test_path_search_glob_in_front PASSED             [ 38%]
+tests/test_library.py::test_path_search_glob_both_sides PASSED           [ 38%]
+tests/test_library.py::test_path_search_ilike_glob_equality PASSED       [ 39%]
+tests/test_library.py::test_path_search_like_glob_equality PASSED        [ 39%]
+tests/test_library.py::test_filetype_search[md-1] PASSED                 [ 40%]
+tests/test_library.py::test_filetype_search[txt-1] PASSED                [ 40%]
+tests/test_library.py::test_filetype_search[png-0] PASSED                [ 41%]
+tests/test_library.py::test_filetype_return_one_filetype[png-2] PASSED   [ 41%]
+tests/test_library.py::test_filetype_return_one_filetype[apng-1] PASSED  [ 41%]
+tests/test_library.py::test_filetype_return_one_filetype[ng-0] PASSED    [ 42%]
+tests/test_library.py::test_mediatype_search[plaintext-2] PASSED         [ 42%]
+tests/test_library.py::test_mediatype_search[image-0] PASSED             [ 43%]
+tests/test_search.py::test_single_constraint[-32] PASSED                 [ 43%]
+tests/test_search.py::test_single_constraint[path:*-32] PASSED           [ 44%]
+tests/test_search.py::test_single_constraint[path:*inherit*-24] PASSED   [ 44%]
+tests/test_search.py::test_single_constraint[path:*comp*-5] PASSED       [ 45%]
+tests/test_search.py::test_single_constraint[special:untagged-3] PASSED  [ 45%]
+tests/test_search.py::test_single_constraint[filetype:png-25] PASSED     [ 45%]
+tests/test_search.py::test_single_constraint[filetype:jpg-6] PASSED      [ 46%]
+tests/test_search.py::test_single_constraint[filetype:'jpg'-6] PASSED    [ 46%]
+tests/test_search.py::test_single_constraint[tag_id:1011-5] PASSED       [ 47%]
+tests/test_search.py::test_single_constraint[tag_id:1038-11] PASSED      [ 47%]
+tests/test_search.py::test_single_constraint[doesnt exist-0] PASSED      [ 48%]
+tests/test_search.py::test_single_constraint[archived-0] PASSED          [ 48%]
+tests/test_search.py::test_single_constraint[favorite-0] PASSED          [ 48%]
+tests/test_search.py::test_single_constraint[tag:favorite-0] PASSED      [ 49%]
+tests/test_search.py::test_single_constraint[circle-11] PASSED           [ 49%]
+tests/test_search.py::test_single_constraint[tag:square-11] PASSED       [ 50%]
+tests/test_search.py::test_single_constraint[green-5] PASSED             [ 50%]
+tests/test_search.py::test_single_constraint[orange-5] PASSED            [ 51%]
+tests/test_search.py::test_single_constraint[tag:orange-5] PASSED        [ 51%]
+tests/test_search.py::test_and[circle aND square-5] PASSED               [ 51%]
+tests/test_search.py::test_and[circle square-5] PASSED                   [ 52%]
+tests/test_search.py::test_and[green AND square-2] PASSED                [ 52%]
+tests/test_search.py::test_and[green square-2] PASSED                    [ 53%]
+tests/test_search.py::test_and[orange AnD square-2] PASSED               [ 53%]
+tests/test_search.py::test_and[orange square-2] PASSED                   [ 54%]
+tests/test_search.py::test_and[orange and filetype:png-5] PASSED         [ 54%]
+tests/test_search.py::test_and[square and filetype:jpg-2] PASSED         [ 54%]
+tests/test_search.py::test_and[orange filetype:png-5] PASSED             [ 55%]
+tests/test_search.py::test_and[green path:*inherit*-4] PASSED            [ 55%]
+tests/test_search.py::test_or[square or circle-17] PASSED                [ 56%]
+tests/test_search.py::test_or[orange or green-10] PASSED                 [ 56%]
+tests/test_search.py::test_or[orange Or circle-14] PASSED                [ 57%]
+tests/test_search.py::test_or[orange oR square-14] PASSED                [ 57%]
+tests/test_search.py::test_or[square OR green-14] PASSED                 [ 58%]
+tests/test_search.py::test_or[circle or green-14] PASSED                 [ 58%]
+tests/test_search.py::test_or[green or circle-14] PASSED                 [ 58%]
+tests/test_search.py::test_or[filetype:jpg or tag:orange-11] PASSED      [ 59%]
+tests/test_search.py::test_or[red or filetype:png-28] PASSED             [ 59%]
+tests/test_search.py::test_or[filetype:jpg or path:*comp*-11] PASSED     [ 60%]
+tests/test_search.py::test_not[not unexistant-32] PASSED                 [ 60%]
+tests/test_search.py::test_not[not path:*-0] PASSED                      [ 61%]
+tests/test_search.py::test_not[not not path:*-32] PASSED                 [ 61%]
+tests/test_search.py::test_not[not special:untagged-29] PASSED           [ 61%]
+tests/test_search.py::test_not[not filetype:png-7] PASSED                [ 62%]
+tests/test_search.py::test_not[not filetype:jpg-26] PASSED               [ 62%]
+tests/test_search.py::test_not[not tag_id:1011-27] PASSED                [ 63%]
+tests/test_search.py::test_not[not tag_id:1038-21] PASSED                [ 63%]
+tests/test_search.py::test_not[not green-27] PASSED                      [ 64%]
+tests/test_search.py::test_not[tag:favorite-0] PASSED                    [ 64%]
+tests/test_search.py::test_not[not circle-21] PASSED                     [ 64%]
+tests/test_search.py::test_not[not tag:square-21] PASSED                 [ 65%]
+tests/test_search.py::test_not[circle and not square-6] PASSED           [ 65%]
+tests/test_search.py::test_not[not circle and square-6] PASSED           [ 66%]
+tests/test_search.py::test_not[special:untagged or not filetype:jpg-26] PASSED [ 66%]
+tests/test_search.py::test_not[not square or green-23] PASSED            [ 67%]
+tests/test_search.py::test_parentheses[(tag_id:1041)-11] PASSED          [ 67%]
+tests/test_search.py::test_parentheses[(((tag_id:1041)))-11] PASSED      [ 67%]
+tests/test_search.py::test_parentheses[not (not tag_id:1041)-11] PASSED  [ 68%]
+tests/test_search.py::test_parentheses[((circle) and (not square))-6] PASSED [ 68%]
+tests/test_search.py::test_parentheses[(not ((square) OR (green)))-18] PASSED [ 69%]
+tests/test_search.py::test_parentheses[filetype:png and (tag:square or green)-12] PASSED [ 69%]
+tests/test_search.py::test_parent_tags[ellipse-17] PASSED                [ 70%]
+tests/test_search.py::test_parent_tags[yellow-15] PASSED                 [ 70%]
+tests/test_search.py::test_parent_tags[color-25] PASSED                  [ 70%]
+tests/test_search.py::test_parent_tags[shape-24] PASSED                  [ 71%]
+tests/test_search.py::test_parent_tags[yellow not green-10] PASSED       [ 71%]
+tests/test_search.py::test_syntax[asd AND] PASSED                        [ 72%]
+tests/test_search.py::test_syntax[asd AND AND] PASSED                    [ 72%]
+tests/test_search.py::test_syntax[tag:(] PASSED                          [ 73%]
+tests/test_search.py::test_syntax[(asd] PASSED                           [ 73%]
+tests/test_search.py::test_syntax[asd[]] PASSED                          [ 74%]
+tests/test_search.py::test_syntax[asd]] PASSED                           [ 74%]
+tests/test_search.py::test_syntax[:] PASSED                              [ 74%]
+tests/test_search.py::test_syntax[tag: :] PASSED                         [ 75%]
+tests/test_translations.py::test_translation_dir PASSED                  [ 75%]
+tests/test_translations.py::test_format_key_validity[qpv.json] PASSED    [ 76%]
+tests/test_translations.py::test_format_key_validity[tr.json] PASSED     [ 76%]
+tests/test_translations.py::test_format_key_validity[hu.json] PASSED     [ 77%]
+tests/test_translations.py::test_format_key_validity[is.json] PASSED     [ 77%]
+tests/test_translations.py::test_format_key_validity[nl.json] PASSED     [ 77%]
+tests/test_translations.py::test_format_key_validity[ja.json] PASSED     [ 78%]
+tests/test_translations.py::test_format_key_validity[de.json] PASSED     [ 78%]
+tests/test_translations.py::test_format_key_validity[ru.json] PASSED     [ 79%]
+tests/test_translations.py::test_format_key_validity[pl.json] PASSED     [ 79%]
+tests/test_translations.py::test_format_key_validity[tok.json] PASSED    [ 80%]
+tests/test_translations.py::test_format_key_validity[ta.json] PASSED     [ 80%]
+tests/test_translations.py::test_format_key_validity[fil.json] PASSED    [ 80%]
+tests/test_translations.py::test_format_key_validity[pt.json] PASSED     [ 81%]
+tests/test_translations.py::test_format_key_validity[en.json] PASSED     [ 81%]
+tests/test_translations.py::test_format_key_validity[it.json] PASSED     [ 82%]
+tests/test_translations.py::test_format_key_validity[ceb.json] PASSED    [ 82%]
+tests/test_translations.py::test_format_key_validity[fr.json] PASSED     [ 83%]
+tests/test_translations.py::test_format_key_validity[el.json] PASSED     [ 83%]
+tests/test_translations.py::test_format_key_validity[ro.json] PASSED     [ 83%]
+tests/test_translations.py::test_format_key_validity[zh_Hans.json] PASSED [ 84%]
+tests/test_translations.py::test_format_key_validity[nb_NO.json] PASSED  [ 84%]
+tests/test_translations.py::test_format_key_validity[cs.json] PASSED     [ 85%]
+tests/test_translations.py::test_format_key_validity[zh_Hant.json] PASSED [ 85%]
+tests/test_translations.py::test_format_key_validity[pt_BR.json] PASSED  [ 86%]
+tests/test_translations.py::test_format_key_validity[da.json] PASSED     [ 86%]
+tests/test_translations.py::test_format_key_validity[th.json] PASSED     [ 87%]
+tests/test_translations.py::test_format_key_validity[sv.json] PASSED     [ 87%]
+tests/test_translations.py::test_format_key_validity[es.json] PASSED     [ 87%]
+tests/test_translations.py::test_for_unnecessary_translations[qpv.json] PASSED [ 88%]
+tests/test_translations.py::test_for_unnecessary_translations[tr.json] PASSED [ 88%]
+tests/test_translations.py::test_for_unnecessary_translations[hu.json] PASSED [ 89%]
+tests/test_translations.py::test_for_unnecessary_translations[is.json] PASSED [ 89%]
+tests/test_translations.py::test_for_unnecessary_translations[nl.json] PASSED [ 90%]
+tests/test_translations.py::test_for_unnecessary_translations[ja.json] PASSED [ 90%]
+tests/test_translations.py::test_for_unnecessary_translations[de.json] PASSED [ 90%]
+tests/test_translations.py::test_for_unnecessary_translations[ru.json] PASSED [ 91%]
+tests/test_translations.py::test_for_unnecessary_translations[pl.json] PASSED [ 91%]
+tests/test_translations.py::test_for_unnecessary_translations[tok.json] PASSED [ 92%]
+tests/test_translations.py::test_for_unnecessary_translations[ta.json] PASSED [ 92%]
+tests/test_translations.py::test_for_unnecessary_translations[fil.json] PASSED [ 93%]
+tests/test_translations.py::test_for_unnecessary_translations[pt.json] PASSED [ 93%]
+tests/test_translations.py::test_for_unnecessary_translations[en.json] PASSED [ 93%]
+tests/test_translations.py::test_for_unnecessary_translations[it.json] PASSED [ 94%]
+tests/test_translations.py::test_for_unnecessary_translations[ceb.json] PASSED [ 94%]
+tests/test_translations.py::test_for_unnecessary_translations[fr.json] PASSED [ 95%]
+tests/test_translations.py::test_for_unnecessary_translations[el.json] PASSED [ 95%]
+tests/test_translations.py::test_for_unnecessary_translations[ro.json] PASSED [ 96%]
+tests/test_translations.py::test_for_unnecessary_translations[zh_Hans.json] PASSED [ 96%]
+tests/test_translations.py::test_for_unnecessary_translations[nb_NO.json] PASSED [ 96%]
+tests/test_translations.py::test_for_unnecessary_translations[cs.json] PASSED [ 97%]
+tests/test_translations.py::test_for_unnecessary_translations[zh_Hant.json] PASSED [ 97%]
+tests/test_translations.py::test_for_unnecessary_translations[pt_BR.json] PASSED [ 98%]
+tests/test_translations.py::test_for_unnecessary_translations[da.json] PASSED [ 98%]
+tests/test_translations.py::test_for_unnecessary_translations[th.json] PASSED [ 99%]
+tests/test_translations.py::test_for_unnecessary_translations[sv.json] PASSED [ 99%]
+tests/test_translations.py::test_for_unnecessary_translations[es.json] PASSED [100%]
+
+=============================== warnings summary ===============================
+src/tagstudio/qt/views/thumb_button.py:25
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/views/thumb_button.py:25: DeprecationWarning: Use QPushButton with 'catch warnings' to silence disconnect warnings instead.
+    class ThumbButton(QPushButtonWrapper):
+
+.venv/lib/python3.12/site-packages/pydub/utils.py:14
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/.venv/lib/python3.12/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13
+    import audioop
+
+tests/test_driver.py:16
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/tests/test_driver.py:16: PytestCollectionWarning: cannot collect test class 'TestDriver' because it has a __init__ constructor (from: tests/test_driver.py)
+    class TestDriver(DriverMixin):
+
+tests/macros/test_dupe_files.py: 1 warning
+tests/macros/test_folders_tags.py: 1 warning
+tests/macros/test_missing_files.py: 1 warning
+tests/macros/test_refresh_dir.py: 19 warnings
+tests/qt/test_build_tag_panel.py: 9 warnings
+tests/qt/test_field_containers.py: 8 warnings
+tests/qt/test_file_path_options.py: 9 warnings
+tests/qt/test_folders_to_tags.py: 1 warning
+tests/qt/test_item_thumb.py: 2 warnings
+tests/qt/test_preview_panel.py: 3 warnings
+tests/qt/test_qt_driver.py: 2 warnings
+tests/qt/test_tag_panel.py: 2 warnings
+tests/qt/test_tag_search_panel.py: 2 warnings
+tests/test_db_migrations.py: 20 warnings
+tests/test_json_migration.py: 14 warnings
+tests/test_library.py: 44 warnings
+tests/test_search.py: 76 warnings
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/.venv/lib/python3.12/site-packages/sqlalchemy/orm/instrumentation.py:507: DeprecationWarning: Use `Version` for storing version, and `ts_ignore` system for file exclusion.
+    instance = self.class_.__new__(self.class_)
+
+tests/macros/test_folders_tags.py::test_folders_to_tags
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/tests/macros/test_folders_tags.py:10: DeprecationWarning: Will be replaced with upcoming 'Macros' feature before v9.6
+    folders_to_tags(library)
+
+tests/macros/test_missing_files.py: 1 warning
+tests/qt/test_file_path_options.py: 3 warnings
+tests/qt/test_qt_driver.py: 4 warnings
+tests/test_library.py: 33 warnings
+tests/test_search.py: 66 warnings
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/library.py:1072: SADeprecationWarning: DISTINCT ON is currently supported only by the PostgreSQL dialect.  Use of DISTINCT ON for other backends is currently silently ignored, however this usage is deprecated, and will raise CompileError in a future release for all backends that do not support this syntax.
+    query_full=str(statement.compile(compile_kwargs={"literal_binds": True})),
+
+tests/macros/test_missing_files.py: 1 warning
+tests/test_library.py: 23 warnings
+tests/test_search.py: 66 warnings
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/library.py:1077: SADeprecationWarning: DISTINCT ON is currently supported only by the PostgreSQL dialect.  Use of DISTINCT ON for other backends is currently silently ignored, however this usage is deprecated, and will raise CompileError in a future release for all backends that do not support this syntax.
+    rows = session.execute(statement).fetchall()
+
+tests/macros/test_refresh_dir.py::test_refresh_new_files[library0-True]
+tests/macros/test_refresh_dir.py::test_refresh_new_files[library0-False]
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/tests/macros/test_refresh_dir.py:23: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    library.set_prefs(LibraryPrefs.IS_EXCLUDE_LIST, exclude_mode)
+
+tests/macros/test_refresh_dir.py::test_refresh_new_files[library0-True]
+tests/macros/test_refresh_dir.py::test_refresh_new_files[library0-False]
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/tests/macros/test_refresh_dir.py:24: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    library.set_prefs(LibraryPrefs.EXTENSION_LIST, [".md"])
+
+tests/qt/test_file_path_options.py::test_filepath_setting[0]
+tests/qt/test_file_path_options.py::test_filepath_setting[1]
+tests/qt/test_file_path_options.py::test_filepath_setting[2]
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/.venv/lib/python3.12/site-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:
+    PydanticSerializationUnexpectedValue(Expected `enum` - serialized value may not be as expected [field_name='splash', input_value='default', input_type=str])
+    return self.__pydantic_serializer__.to_python(
+
+tests/qt/test_file_path_options.py::test_title_update[0-<lambda>]
+tests/qt/test_file_path_options.py::test_title_update[1-<lambda>]
+tests/qt/test_file_path_options.py::test_title_update[2-<lambda>]
+tests/qt/test_qt_driver.py::test_browsing_state_update
+tests/qt/test_qt_driver.py::test_browsing_state_update
+tests/qt/test_qt_driver.py::test_browsing_state_update
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/library.py:1084: SADeprecationWarning: DISTINCT ON is currently supported only by the PostgreSQL dialect.  Use of DISTINCT ON for other backends is currently silently ignored, however this usage is deprecated, and will raise CompileError in a future release for all backends that do not support this syntax.
+    ids = list(session.scalars(statement))
+
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_6]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_7]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_8]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_9]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_100]
+tests/test_search.py::test_single_constraint[-32]
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/library.py:752: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    extensions: list[str] = self.prefs(LibraryPrefs.EXTENSION_LIST)  # pyright: ignore
+
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_6]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_7]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_8]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_9]
+tests/test_db_migrations.py::test_library_migrations[/Users/kaffe/kaffe\u2018code/KTH_course/DD2480/TagStudioSEF/tests/fixtures/empty_libraries/DB_VERSION_100]
+tests/test_search.py::test_single_constraint[-32]
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/library.py:753: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    is_exclude_list: bool = self.prefs(LibraryPrefs.IS_EXCLUDE_LIST)  # pyright: ignore
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:100: DeprecationWarning: Use QPushButton with 'catch warnings' to silence disconnect warnings instead.
+    cancel_button = QPushButtonWrapper(Translations["generic.cancel"])
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:101: DeprecationWarning: Use QPushButton with 'catch warnings' to silence disconnect warnings instead.
+    next_button = QPushButtonWrapper(Translations["generic.continue"])
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:300: DeprecationWarning: Use QPushButton with 'catch warnings' to silence disconnect warnings instead.
+    back_button = QPushButtonWrapper(Translations["generic.navigation.back"])
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:301: DeprecationWarning: Use QPushButton with 'catch warnings' to silence disconnect warnings instead.
+    start_button = QPushButtonWrapper(Translations["json_migration.start_and_preview"])
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:305: DeprecationWarning: Use QPushButton with 'catch warnings' to silence disconnect warnings instead.
+    finish_button: QPushButtonWrapper = QPushButtonWrapper(
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/library.py:323: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    self.set_prefs(LibraryPrefs.EXTENSION_LIST, [x.strip(".") for x in json_lib.ext_list])
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/library.py:324: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    self.set_prefs(LibraryPrefs.IS_EXCLUDE_LIST, json_lib.is_exclude_list)
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/tests/test_json_migration.py:47: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    assert len(modal.json_lib.ext_list) == len(modal.sql_lib.prefs(LibraryPrefs.EXTENSION_LIST))
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:674: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    return self.json_lib.is_exclude_list == self.sql_lib.prefs(LibraryPrefs.IS_EXCLUDE_LIST)
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/tests/test_json_migration.py:51: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    for ext in modal.sql_lib.prefs(LibraryPrefs.EXTENSION_LIST):  # pyright: ignore[reportUnknownVariableType]
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:473: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    len(self.sql_lib.prefs(LibraryPrefs.EXTENSION_LIST)),
+
+tests/test_json_migration.py::test_json_migration
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/qt/mixed/migration_modal.py:478: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    self.sql_lib.prefs(LibraryPrefs.IS_EXCLUDE_LIST),  # pyright: ignore[reportArgumentType]
+
+tests/test_library.py::test_preferences
+tests/test_library.py::test_preferences
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/tests/test_library.py:204: DeprecationWarning: Use `get_version() for version and `ts_ignore` system for extension exclusion.
+    assert library.prefs(pref) == pref.default
+
+tests/test_search.py::test_single_constraint[-32]
+  /Users/kaffe/kaffe‘code/KTH_course/DD2480/TagStudioSEF/src/tagstudio/core/library/alchemy/visitors.py:54: SADeprecationWarning: Invoking or_() without arguments is deprecated, and will be disallowed in a future release.   For an empty or_() construct, use 'or_(false(), *args)' or 'or_(False, *args)'.
+    return or_(*bool_expressions)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------------------------- snapshot report summary ----------------------------
+1 snapshot passed.
+====================== 231 passed, 455 warnings in 20.63s ======================
