@@ -3,13 +3,15 @@
 
 import math
 import time
+import re
+import markdown as md
 from pathlib import Path
 from typing import TYPE_CHECKING, override
 
 import structlog
-from PySide6.QtCore import QBuffer, QByteArray, QSize, Qt
-from PySide6.QtGui import QAction, QMovie, QPixmap, QResizeEvent
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedLayout, QWidget
+from PySide6.QtCore import QBuffer, QByteArray, QSize, Qt, QUrl
+from PySide6.QtGui import QAction, QMovie, QPixmap, QResizeEvent, QDesktopServices
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedLayout, QWidget, QTextBrowser
 
 from tagstudio.core.library.alchemy.library import Library
 from tagstudio.core.media_types import MediaType
@@ -98,6 +100,28 @@ class PreviewThumbView(QWidget):
         self.__media_player_page = QWidget()
         self.__stacked_page_setup(self.__media_player_page, self.__media_player)
 
+        # Text / Markdown preview ==============================================
+        # Note: We keep this in the same stacked layout so the preview panel can
+        # switch to rich text for markdown instead of an image thumbnail.
+        self.__text_browser = QTextBrowser()
+        # We'll handle links ourselves (local-only) via anchorClicked.
+        self.__text_browser.setOpenExternalLinks(False)
+        self.__text_browser.setReadOnly(True)
+        self.__text_browser.setFrameShape(QLabel().frameShape())  # keep consistent w/ other pages
+        self.__text_browser.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        # Default to wrapping at the widget width.
+        self.__text_browser.setLineWrapMode(QTextBrowser.LineWrapMode.WidgetWidth)
+        self.__text_browser.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
+        self.__text_browser.addAction(open_file_action)
+        self.__text_browser.addAction(open_explorer_action)
+        self.__text_browser.addAction(delete_action)
+
+        # Local-only anchor handler (connected once).
+        self.__text_browser.anchorClicked.connect(self.__on_text_anchor_clicked)
+
+        self.__text_page = QWidget()
+        self.__stacked_page_setup(self.__text_page, self.__text_browser)
+
         self.__thumb_renderer = ThumbRenderer(driver)
         self.__thumb_renderer.updated.connect(self.__thumb_renderer_updated_callback)
         self.__thumb_renderer.updated_ratio.connect(self.__thumb_renderer_updated_ratio_callback)
@@ -105,6 +129,7 @@ class PreviewThumbView(QWidget):
         self.__image_layout.addWidget(self.__preview_img_page)
         self.__image_layout.addWidget(self.__preview_gif_page)
         self.__image_layout.addWidget(self.__media_player_page)
+        self.__image_layout.addWidget(self.__text_page)
 
         self.setMinimumSize(*self.__img_button_size)
 
@@ -174,6 +199,11 @@ class PreviewThumbView(QWidget):
         self.__media_player.setMaximumSize(adj_size)
         self.__media_player.setMinimumSize(adj_size)
 
+        # Text/Markdown preview should use the full available area (no aspect ratio).
+        full_size = QSize(int(size[0]), int(size[1]))
+        self.__text_browser.setMinimumSize(full_size)
+        self.__text_browser.setMaximumSize(full_size)
+
         proxy_style = RoundedPixmapStyle(radius=8)
         self.__preview_gif.setStyle(proxy_style)
         self.__media_player.setStyle(proxy_style)
@@ -188,6 +218,19 @@ class PreviewThumbView(QWidget):
         else:
             self.__media_player.stop()
             self.__media_player.hide()
+
+        # If showing text, hide image wrapper and gifs.
+        if preview == MediaType.TEXT:
+            self.__button_wrapper.hide()
+            if self.__preview_gif.movie():
+                self.__preview_gif.movie().stop()
+                self.__gif_buffer.close()
+            self.__preview_gif.hide()
+            self.__text_browser.show()
+            self.__image_layout.setCurrentWidget(self.__text_page)
+            return
+        else:
+            self.__text_browser.hide()
 
         if preview in [MediaType.IMAGE, MediaType.AUDIO]:
             self.__button_wrapper.show()
@@ -293,10 +336,95 @@ class PreviewThumbView(QWidget):
         self.__switch_preview(MediaType.IMAGE)
         self.__render_thumb(filepath)
 
+    def __on_text_anchor_clicked(self, url) -> None:
+        """Open only local file links from markdown/text preview."""
+        qurl = url if isinstance(url, QUrl) else QUrl(str(url))
+        scheme = (qurl.scheme() or "").lower()
+        if scheme in {"", "file"}:
+            QDesktopServices.openUrl(qurl)
+
+    def _display_text(
+        self,
+        text: str,
+        is_markdown: bool = False,
+        source_filepath: Path | None = None,
+    ) -> FileAttributeData:
+        """Display plaintext or markdown in a scrollable, wrapped widget.
+
+        Args:
+            text: The text contents to display.
+            is_markdown: If True, render as markdown.
+            source_filepath: If provided, used to resolve relative links/images.
+        """
+        self.__switch_preview(MediaType.TEXT)
+
+        # Resolve relative links/images against the markdown file location.
+        if source_filepath is not None:
+            base_url = QUrl.fromLocalFile(str(source_filepath.parent) + "/")
+            self.__text_browser.document().setBaseUrl(base_url)
+        else:
+            self.__text_browser.document().setBaseUrl(QUrl())
+
+        # Block loading remote resources for now.
+        def _accept_url(url):
+            qurl = url if isinstance(url, QUrl) else QUrl(str(url))
+            scheme = (qurl.scheme() or "").lower()
+            return scheme in {"", "file"}
+
+
+        # Filter resource loads (images) to local only.
+        def _load_resource(type_, name):
+            # QTextBrowser calls into QTextDocument.loadResource; we can block remote here.
+            if not _accept_url(name):
+                return None
+
+            return QTextBrowser.loadResource(self.__text_browser, type_, name)
+
+        # Monkey-patch just this instance (simple + contained).
+        self.__text_browser.loadResource = _load_resource  # type: ignore[method-assign]
+
+        # Render markdown.
+        if is_markdown:
+            try:
+                html_body = md.markdown(
+                    text,
+                    extensions=[
+                        "extra",  # tables, fenced code, etc.
+                        "sane_lists",
+                    ],
+                    output_format="html5",
+                )
+            except Exception:
+                # Fallback: keep the previous simple image rewrite so at least images don't blow up.
+                html_body = _rewrite_md_images(text)
+
+            # Ensure images scale to the available width.
+            # - max-width:100% keeps within the column
+            # - height:auto preserves aspect ratio
+            # Also make pre blocks readable.
+            html = (
+                "<html><head><meta charset='utf-8'>"
+                "<style>"
+                "img{max-width:100%;height:auto;}"
+                "pre{white-space:pre-wrap;}"
+                "code{white-space:pre-wrap;}"
+                "</style></head>"
+                "<body style='margin:0; padding:0;'>"
+                + html_body
+                + "</body></html>"
+            )
+            self.__text_browser.setHtml(html)
+        else:
+            self.__text_browser.setPlainText(text)
+
+        return FileAttributeData()
+
     def hide_preview(self) -> None:
         """Completely hide the file preview."""
         self.__switch_preview(None)
         self.__filepath = None
+        self.__text_browser.clear()
+        self.__text_browser.document().setBaseUrl(QUrl())
 
     @override
     def resizeEvent(self, event: QResizeEvent) -> None:
@@ -310,3 +438,22 @@ class PreviewThumbView(QWidget):
     @property
     def media_player(self) -> MediaPlayer:
         return self.__media_player
+
+def _rewrite_md_images(markdown: str) -> str:
+    """Rewrite common markdown image syntax to HTML <img> tags.
+
+    This is a best-effort fallback used if full markdown -> HTML conversion fails.
+    """
+    _MD_IMAGE_PATTERN = re.compile(r"!\[([^]]*)]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)")
+
+    def repl(m: re.Match) -> str:
+        alt = m.group(1) or ""
+        src = m.group(2) or ""
+        title = m.group(3)
+        title_attr = f' title="{title}"' if title else ""
+        return (
+            f'<img src="{src}" alt="{alt}"{title_attr} '
+            'style="max-width:100%; height:auto;" />'
+        )
+
+    return _MD_IMAGE_PATTERN.sub(repl, markdown)
