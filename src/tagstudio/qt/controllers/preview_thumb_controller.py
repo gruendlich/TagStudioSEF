@@ -113,15 +113,11 @@ class PreviewThumb(PreviewThumbView):
 
         ext = filepath.suffix.lower()
 
-        # Markdown / Text ------------------------------------------------------
-        # Prefer a real text preview for markdown (and other plaintext) instead of
-        # the old image-thumbnail-based rendering.
+        # Markdown and Plaintext Files
         if MediaCategories.PLAINTEXT_TYPES.contains(ext, mime_fallback=True):
             try:
                 from tagstudio.qt.previews.renderer import detect_char_encoding
-
                 encoding = detect_char_encoding(filepath)
-                # Cap read size to avoid huge file freezes.
                 with open(filepath, encoding=encoding, errors="replace") as f:
                     text = f.read(256_000)
             except Exception as e:

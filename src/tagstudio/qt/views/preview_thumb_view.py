@@ -107,25 +107,20 @@ class PreviewThumbView(QWidget):
         self.__media_player_page = QWidget()
         self.__stacked_page_setup(self.__media_player_page, self.__media_player)
 
-        # Text / Markdown preview ==============================================
-        # Note: We keep this in the same stacked layout so the preview panel can
-        # switch to rich text for markdown instead of an image thumbnail.
+        # Text / Markdown preview
         self.__text_browser = QTextBrowser()
-        # We'll handle links ourselves (local-only) via anchorClicked.
         self.__text_browser.setOpenExternalLinks(False)
         self.__text_browser.setReadOnly(True)
-        self.__text_browser.setFrameShape(QLabel().frameShape())  # keep consistent w/ other pages
+        self.__text_browser.setFrameShape(QLabel().frameShape())
         self.__text_browser.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
-        # Default to wrapping at the widget width.
+
         self.__text_browser.setLineWrapMode(QTextBrowser.LineWrapMode.WidgetWidth)
         self.__text_browser.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
         self.__text_browser.addAction(open_file_action)
         self.__text_browser.addAction(open_explorer_action)
         self.__text_browser.addAction(delete_action)
 
-        # Local-only anchor handler (connected once).
         self.__text_browser.anchorClicked.connect(self.__on_text_anchor_clicked)
-
         self.__text_page = QWidget()
         self.__stacked_page_setup(self.__text_page, self.__text_browser)
 
@@ -206,7 +201,6 @@ class PreviewThumbView(QWidget):
         self.__media_player.setMaximumSize(adj_size)
         self.__media_player.setMinimumSize(adj_size)
 
-        # Text/Markdown preview should use the full available area (no aspect ratio).
         full_size = QSize(int(size[0]), int(size[1]))
         self.__text_browser.setMinimumSize(full_size)
         self.__text_browser.setMaximumSize(full_size)
@@ -226,7 +220,6 @@ class PreviewThumbView(QWidget):
             self.__media_player.stop()
             self.__media_player.hide()
 
-        # If showing text, hide image wrapper and gifs.
         if preview == MediaType.TEXT:
             self.__button_wrapper.hide()
             if self.__preview_gif.movie():
@@ -365,7 +358,6 @@ class PreviewThumbView(QWidget):
         """
         self.__switch_preview(MediaType.TEXT)
 
-        # Resolve relative links/images against the markdown file location.
         if source_filepath is not None:
             base_url = QUrl.fromLocalFile(str(source_filepath.parent) + "/")
             self.__text_browser.document().setBaseUrl(base_url)
@@ -386,8 +378,7 @@ class PreviewThumbView(QWidget):
 
             return QTextBrowser.loadResource(self.__text_browser, type_, name)
 
-        # Monkey-patch just this instance (simple + contained).
-        self.__text_browser.loadResource = _load_resource  # type: ignore[method-assign]
+        self.__text_browser.loadResource = _load_resource
 
         # Render markdown.
         if is_markdown:
@@ -395,19 +386,15 @@ class PreviewThumbView(QWidget):
                 html_body = md.markdown(
                     text,
                     extensions=[
-                        "extra",  # tables, fenced code, etc.
+                        "extra",
                         "sane_lists",
                     ],
                     output_format="html5",
                 )
             except Exception:
-                # Fallback: keep the previous simple image rewrite so at least images don't blow up.
                 html_body = _rewrite_md_images(text)
 
             # Ensure images scale to the available width.
-            # - max-width:100% keeps within the column
-            # - height:auto preserves aspect ratio
-            # Also make pre blocks readable.
             html = (
                 "<html><head><meta charset='utf-8'>"
                 "<style>"
