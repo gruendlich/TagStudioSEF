@@ -381,6 +381,24 @@ class MediaCategories:
         "license",
         "readme",
     }
+    _SUBTITLE_SET: set[str] = {
+        ".ass",
+        ".dfxp",
+        ".idx",
+        ".itt",
+        ".lrc",
+        ".rt",
+        ".sami",
+        ".sbv",
+        ".scc",
+        ".smi",
+        ".srt",
+        ".ssa",
+        ".stl",
+        ".sub",
+        ".ttml",
+        ".vtt",
+    }
     _PRESENTATION_SET: set[str] = {
         ".key",
         ".odp",
@@ -628,7 +646,7 @@ class MediaCategories:
     )
     TEXT_TYPES = MediaCategory(
         media_type=MediaType.TEXT,
-        extensions=_DOCUMENT_SET | _PLAINTEXT_SET,
+        extensions=_DOCUMENT_SET | _PLAINTEXT_SET | _SUBTITLE_SET,
         is_iana=True,
         name="text",
     )
