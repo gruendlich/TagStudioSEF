@@ -2,6 +2,7 @@ import pytest
 
 from tagstudio.core.media_types import MediaCategories, MediaType
 
+
 @pytest.mark.parametrize(
     "ext",
     [
@@ -17,6 +18,5 @@ from tagstudio.core.media_types import MediaCategories, MediaType
         ".ttml",
     ],
 )
-
 def test_subtitle_extensions_are_classified_as_text(ext: str) -> None:
     assert MediaType.TEXT in MediaCategories.get_types(ext)

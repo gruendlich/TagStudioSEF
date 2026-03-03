@@ -398,7 +398,7 @@ class MediaCategories:
         ".sub",
         ".ttml",
         ".vtt",
-    } 
+    }
     _PRESENTATION_SET: set[str] = {
         ".key",
         ".odp",
