@@ -38,6 +38,26 @@ logger = structlog.get_logger(__name__)
 THUMB_SIZE_FACTOR = 2
 
 
+class _LocalOnlyTextBrowser(QTextBrowser):
+    """QTextBrowser that blocks loading non-local resources (e.g., http/https).
+
+    This is used for markdown previews so relative images work, while remote images
+    are blocked (per current requirements).
+    """
+
+    @staticmethod
+    def _accept_url(url: object) -> bool:
+        qurl = url if isinstance(url, QUrl) else QUrl(str(url))
+        scheme = (qurl.scheme() or "").lower()
+        return scheme in {"", "file"}
+
+    def loadResource(self, type_: int, name: QUrl | str):
+        qurl = name if isinstance(name, QUrl) else QUrl(str(name))
+        if not self._accept_url(qurl):
+            return None
+        return super().loadResource(type_, qurl)
+
+
 class PreviewThumbView(QWidget):
     """The Preview Panel Widget."""
 
@@ -108,7 +128,7 @@ class PreviewThumbView(QWidget):
         self.__stacked_page_setup(self.__media_player_page, self.__media_player)
 
         # Text / Markdown preview
-        self.__text_browser = QTextBrowser()
+        self.__text_browser = _LocalOnlyTextBrowser()
         self.__text_browser.setOpenExternalLinks(False)
         self.__text_browser.setReadOnly(True)
         self.__text_browser.setFrameShape(QLabel().frameShape())
@@ -364,22 +384,6 @@ class PreviewThumbView(QWidget):
         else:
             self.__text_browser.document().setBaseUrl(QUrl())
 
-        # Block loading remote resources for now.
-        def _accept_url(url):
-            qurl = url if isinstance(url, QUrl) else QUrl(str(url))
-            scheme = (qurl.scheme() or "").lower()
-            return scheme in {"", "file"}
-
-        # Filter resource loads (images) to local only.
-        def _load_resource(type_, name):
-            # QTextBrowser calls into QTextDocument.loadResource; we can block remote here.
-            if not _accept_url(name):
-                return None
-
-            return QTextBrowser.loadResource(self.__text_browser, type_, name)
-
-        self.__text_browser.loadResource = _load_resource
-
         # Render markdown.
         if is_markdown:
             try:
@@ -389,7 +393,7 @@ class PreviewThumbView(QWidget):
                         "extra",
                         "sane_lists",
                     ],
-                    output_format="html5",
+                    output_format="html",
                 )
             except Exception:
                 html_body = _rewrite_md_images(text)

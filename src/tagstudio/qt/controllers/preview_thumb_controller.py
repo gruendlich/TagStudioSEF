@@ -117,6 +117,7 @@ class PreviewThumb(PreviewThumbView):
         if MediaCategories.PLAINTEXT_TYPES.contains(ext, mime_fallback=True):
             try:
                 from tagstudio.qt.previews.renderer import detect_char_encoding
+
                 encoding = detect_char_encoding(filepath)
                 with open(filepath, encoding=encoding, errors="replace") as f:
                     text = f.read(256_000)
