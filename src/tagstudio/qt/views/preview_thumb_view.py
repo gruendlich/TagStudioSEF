@@ -2,16 +2,23 @@
 # Created for TagStudio: https://github.com/CyanVoxel/TagStudio
 
 import math
-import time
 import re
-import markdown as md
+import time
 from pathlib import Path
 from typing import TYPE_CHECKING, override
 
+import markdown as md
 import structlog
 from PySide6.QtCore import QBuffer, QByteArray, QSize, Qt, QUrl
-from PySide6.QtGui import QAction, QMovie, QPixmap, QResizeEvent, QDesktopServices
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedLayout, QWidget, QTextBrowser
+from PySide6.QtGui import QAction, QDesktopServices, QMovie, QPixmap, QResizeEvent
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QStackedLayout,
+    QTextBrowser,
+    QWidget,
+)
 
 from tagstudio.core.library.alchemy.library import Library
 from tagstudio.core.media_types import MediaType
@@ -371,7 +378,6 @@ class PreviewThumbView(QWidget):
             scheme = (qurl.scheme() or "").lower()
             return scheme in {"", "file"}
 
-
         # Filter resource loads (images) to local only.
         def _load_resource(type_, name):
             # QTextBrowser calls into QTextDocument.loadResource; we can block remote here.
@@ -409,9 +415,7 @@ class PreviewThumbView(QWidget):
                 "pre{white-space:pre-wrap;}"
                 "code{white-space:pre-wrap;}"
                 "</style></head>"
-                "<body style='margin:0; padding:0;'>"
-                + html_body
-                + "</body></html>"
+                "<body style='margin:0; padding:0;'>" + html_body + "</body></html>"
             )
             self.__text_browser.setHtml(html)
         else:
@@ -439,21 +443,19 @@ class PreviewThumbView(QWidget):
     def media_player(self) -> MediaPlayer:
         return self.__media_player
 
+
 def _rewrite_md_images(markdown: str) -> str:
     """Rewrite common markdown image syntax to HTML <img> tags.
 
     This is a best-effort fallback used if full markdown -> HTML conversion fails.
     """
-    _MD_IMAGE_PATTERN = re.compile(r"!\[([^]]*)]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)")
+    _md_image_pattern = re.compile(r"!\[([^]]*)]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)")
 
     def repl(m: re.Match) -> str:
         alt = m.group(1) or ""
         src = m.group(2) or ""
         title = m.group(3)
         title_attr = f' title="{title}"' if title else ""
-        return (
-            f'<img src="{src}" alt="{alt}"{title_attr} '
-            'style="max-width:100%; height:auto;" />'
-        )
+        return f'<img src="{src}" alt="{alt}"{title_attr} style="max-width:100%; height:auto;" />'
 
-    return _MD_IMAGE_PATTERN.sub(repl, markdown)
+    return _md_image_pattern.sub(repl, markdown)

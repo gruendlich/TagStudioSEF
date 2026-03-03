@@ -9,7 +9,6 @@ from tagstudio.core.library.alchemy.library import Library
 from tagstudio.qt.controllers.preview_thumb_controller import PreviewThumb
 from tagstudio.qt.ts_qt import QtDriver
 
-
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 
@@ -43,7 +42,7 @@ def test_markdown_preview_uses_text_widget(qtbot: QtBot, tmp_path: Path):
 
         widget.display_file(md_path)
 
-        text = widget._PreviewThumbView__text_browser.toPlainText()  # type: ignore[attr-defined]
+        text = widget._PreviewThumbView__text_browser.toPlainText()
         assert "Title" in text
         assert "bold" in text
 
@@ -75,7 +74,7 @@ def test_markdown_preview_relative_images_load_from_disk(qtbot: QtBot, tmp_path:
 
         widget.display_file(md_path)
 
-        browser = widget._PreviewThumbView__text_browser  # type: ignore[attr-defined]
+        browser = widget._PreviewThumbView__text_browser
         doc = browser.document()
 
         # Verify the image resource got loaded.
@@ -122,7 +121,7 @@ def test_markdown_preview_large_images_are_scaled_down(qtbot: QtBot, tmp_path: P
 
         widget.display_file(md_path)
 
-        browser = widget._PreviewThumbView__text_browser  # type: ignore[attr-defined]
+        browser = widget._PreviewThumbView__text_browser
 
         # Verify the *rendered* image size fits the viewport.
         from PySide6.QtGui import QTextCursor, QTextImageFormat
@@ -171,8 +170,7 @@ def test_markdown_preview_expands_to_available_space(qtbot: QtBot, tmp_path: Pat
 
         widget.display_file(md_path)
 
-        browser = widget._PreviewThumbView__text_browser  # type: ignore[attr-defined]
+        browser = widget._PreviewThumbView__text_browser
         # Leave tolerance for layout margins.
         assert browser.width() >= 500
         assert browser.height() >= 250
-
