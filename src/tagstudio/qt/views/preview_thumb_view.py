@@ -2,14 +2,23 @@
 # Created for TagStudio: https://github.com/CyanVoxel/TagStudio
 
 import math
+import re
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, override
 
+import markdown as md
 import structlog
-from PySide6.QtCore import QBuffer, QByteArray, QSize, Qt
-from PySide6.QtGui import QAction, QMovie, QPixmap, QResizeEvent
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedLayout, QWidget
+from PySide6.QtCore import QBuffer, QByteArray, QSize, Qt, QUrl
+from PySide6.QtGui import QAction, QDesktopServices, QMovie, QPixmap, QResizeEvent
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QStackedLayout,
+    QTextBrowser,
+    QWidget,
+)
 
 from tagstudio.core.library.alchemy.library import Library
 from tagstudio.core.media_types import MediaType
@@ -27,6 +36,26 @@ logger = structlog.get_logger(__name__)
 
 
 THUMB_SIZE_FACTOR = 2
+
+
+class _LocalOnlyTextBrowser(QTextBrowser):
+    """QTextBrowser that blocks loading non-local resources (e.g., http/https).
+
+    This is used for markdown previews so relative images work, while remote images
+    are blocked (per current requirements).
+    """
+
+    @staticmethod
+    def _accept_url(url: object) -> bool:
+        qurl = url if isinstance(url, QUrl) else QUrl(str(url))
+        scheme = (qurl.scheme() or "").lower()
+        return scheme in {"", "file"}
+
+    def loadResource(self, type_: int, name: QUrl | str):
+        qurl = name if isinstance(name, QUrl) else QUrl(str(name))
+        if not self._accept_url(qurl):
+            return None
+        return super().loadResource(type_, qurl)
 
 
 class PreviewThumbView(QWidget):
@@ -98,6 +127,23 @@ class PreviewThumbView(QWidget):
         self.__media_player_page = QWidget()
         self.__stacked_page_setup(self.__media_player_page, self.__media_player)
 
+        # Text / Markdown preview
+        self.__text_browser = _LocalOnlyTextBrowser()
+        self.__text_browser.setOpenExternalLinks(False)
+        self.__text_browser.setReadOnly(True)
+        self.__text_browser.setFrameShape(QLabel().frameShape())
+        self.__text_browser.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+
+        self.__text_browser.setLineWrapMode(QTextBrowser.LineWrapMode.WidgetWidth)
+        self.__text_browser.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
+        self.__text_browser.addAction(open_file_action)
+        self.__text_browser.addAction(open_explorer_action)
+        self.__text_browser.addAction(delete_action)
+
+        self.__text_browser.anchorClicked.connect(self.__on_text_anchor_clicked)
+        self.__text_page = QWidget()
+        self.__stacked_page_setup(self.__text_page, self.__text_browser)
+
         self.__thumb_renderer = ThumbRenderer(driver)
         self.__thumb_renderer.updated.connect(self.__thumb_renderer_updated_callback)
         self.__thumb_renderer.updated_ratio.connect(self.__thumb_renderer_updated_ratio_callback)
@@ -105,6 +151,7 @@ class PreviewThumbView(QWidget):
         self.__image_layout.addWidget(self.__preview_img_page)
         self.__image_layout.addWidget(self.__preview_gif_page)
         self.__image_layout.addWidget(self.__media_player_page)
+        self.__image_layout.addWidget(self.__text_page)
 
         self.setMinimumSize(*self.__img_button_size)
 
@@ -174,6 +221,10 @@ class PreviewThumbView(QWidget):
         self.__media_player.setMaximumSize(adj_size)
         self.__media_player.setMinimumSize(adj_size)
 
+        full_size = QSize(int(size[0]), int(size[1]))
+        self.__text_browser.setMinimumSize(full_size)
+        self.__text_browser.setMaximumSize(full_size)
+
         proxy_style = RoundedPixmapStyle(radius=8)
         self.__preview_gif.setStyle(proxy_style)
         self.__media_player.setStyle(proxy_style)
@@ -188,6 +239,18 @@ class PreviewThumbView(QWidget):
         else:
             self.__media_player.stop()
             self.__media_player.hide()
+
+        if preview == MediaType.TEXT:
+            self.__button_wrapper.hide()
+            if self.__preview_gif.movie():
+                self.__preview_gif.movie().stop()
+                self.__gif_buffer.close()
+            self.__preview_gif.hide()
+            self.__text_browser.show()
+            self.__image_layout.setCurrentWidget(self.__text_page)
+            return
+        else:
+            self.__text_browser.hide()
 
         if preview in [MediaType.IMAGE, MediaType.AUDIO]:
             self.__button_wrapper.show()
@@ -293,10 +356,70 @@ class PreviewThumbView(QWidget):
         self.__switch_preview(MediaType.IMAGE)
         self.__render_thumb(filepath)
 
+    def __on_text_anchor_clicked(self, url) -> None:
+        """Open only local file links from markdown/text preview."""
+        qurl = url if isinstance(url, QUrl) else QUrl(str(url))
+        scheme = (qurl.scheme() or "").lower()
+        if scheme in {"", "file"}:
+            QDesktopServices.openUrl(qurl)
+
+    def _display_text(
+        self,
+        text: str,
+        is_markdown: bool = False,
+        source_filepath: Path | None = None,
+    ) -> FileAttributeData:
+        """Display plaintext or markdown in a scrollable, wrapped widget.
+
+        Args:
+            text: The text contents to display.
+            is_markdown: If True, render as markdown.
+            source_filepath: If provided, used to resolve relative links/images.
+        """
+        self.__switch_preview(MediaType.TEXT)
+
+        if source_filepath is not None:
+            base_url = QUrl.fromLocalFile(str(source_filepath.parent) + "/")
+            self.__text_browser.document().setBaseUrl(base_url)
+        else:
+            self.__text_browser.document().setBaseUrl(QUrl())
+
+        # Render markdown.
+        if is_markdown:
+            try:
+                html_body = md.markdown(
+                    text,
+                    extensions=[
+                        "extra",
+                        "sane_lists",
+                    ],
+                    output_format="html",
+                )
+            except Exception:
+                html_body = _rewrite_md_images(text)
+
+            # Ensure images scale to the available width.
+            html = (
+                "<html><head><meta charset='utf-8'>"
+                "<style>"
+                "img{max-width:100%;height:auto;}"
+                "pre{white-space:pre-wrap;}"
+                "code{white-space:pre-wrap;}"
+                "</style></head>"
+                "<body style='margin:0; padding:0;'>" + html_body + "</body></html>"
+            )
+            self.__text_browser.setHtml(html)
+        else:
+            self.__text_browser.setPlainText(text)
+
+        return FileAttributeData()
+
     def hide_preview(self) -> None:
         """Completely hide the file preview."""
         self.__switch_preview(None)
         self.__filepath = None
+        self.__text_browser.clear()
+        self.__text_browser.document().setBaseUrl(QUrl())
 
     @override
     def resizeEvent(self, event: QResizeEvent) -> None:
@@ -310,3 +433,20 @@ class PreviewThumbView(QWidget):
     @property
     def media_player(self) -> MediaPlayer:
         return self.__media_player
+
+
+def _rewrite_md_images(markdown: str) -> str:
+    """Rewrite common markdown image syntax to HTML <img> tags.
+
+    This is a best-effort fallback used if full markdown -> HTML conversion fails.
+    """
+    _md_image_pattern = re.compile(r"!\[([^]]*)]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)")
+
+    def repl(m: re.Match) -> str:
+        alt = m.group(1) or ""
+        src = m.group(2) or ""
+        title = m.group(3)
+        title_attr = f' title="{title}"' if title else ""
+        return f'<img src="{src}" alt="{alt}"{title_attr} style="max-width:100%; height:auto;" />'
+
+    return _md_image_pattern.sub(repl, markdown)

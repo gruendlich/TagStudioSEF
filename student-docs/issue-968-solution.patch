@@ -1,0 +1,438 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index 9d18260..1b4176e 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -35,6 +35,7 @@ dependencies = [
+     "wcmatch==10.*",
+     "requests~=2.31.0",
+     "semver~=3.0.4",
++    "markdown~=3.7",
+ ]
+ 
+ [project.optional-dependencies]
+diff --git a/src/tagstudio/qt/controllers/preview_thumb_controller.py b/src/tagstudio/qt/controllers/preview_thumb_controller.py
+index ecc5d96..7651ad5 100644
+--- a/src/tagstudio/qt/controllers/preview_thumb_controller.py
++++ b/src/tagstudio/qt/controllers/preview_thumb_controller.py
+@@ -113,6 +113,25 @@ class PreviewThumb(PreviewThumbView):
+ 
+         ext = filepath.suffix.lower()
+ 
++        # Markdown / Text ------------------------------------------------------
++        # Prefer a real text preview for markdown (and other plaintext) instead of
++        # the old image-thumbnail-based rendering.
++        if MediaCategories.PLAINTEXT_TYPES.contains(ext, mime_fallback=True):
++            try:
++                from tagstudio.qt.previews.renderer import detect_char_encoding
++
++                encoding = detect_char_encoding(filepath)
++                # Cap read size to avoid huge file freezes.
++                with open(filepath, encoding=encoding, errors="replace") as f:
++                    text = f.read(256_000)
++            except Exception as e:
++                logger.error("[PreviewThumb] Could not load text file", filepath=filepath, error=e)
++                text = ""
++
++            is_markdown = ext in {".md", ".markdown", ".mkd", ".rmd"}
++            self._display_text(text, is_markdown=is_markdown, source_filepath=filepath)
++            return FileAttributeData()
++
+         # Video
+         if MediaCategories.VIDEO_TYPES.contains(ext, mime_fallback=True) and is_readable_video(
+             filepath
+diff --git a/src/tagstudio/qt/views/preview_thumb_view.py b/src/tagstudio/qt/views/preview_thumb_view.py
+index e50509a..550f1be 100644
+--- a/src/tagstudio/qt/views/preview_thumb_view.py
++++ b/src/tagstudio/qt/views/preview_thumb_view.py
+@@ -3,13 +3,15 @@
+ 
+ import math
+ import time
++import re
++import markdown as md
+ from pathlib import Path
+ from typing import TYPE_CHECKING, override
+ 
+ import structlog
+-from PySide6.QtCore import QBuffer, QByteArray, QSize, Qt
+-from PySide6.QtGui import QAction, QMovie, QPixmap, QResizeEvent
+-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedLayout, QWidget
++from PySide6.QtCore import QBuffer, QByteArray, QSize, Qt, QUrl
++from PySide6.QtGui import QAction, QMovie, QPixmap, QResizeEvent, QDesktopServices
++from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QStackedLayout, QWidget, QTextBrowser
+ 
+ from tagstudio.core.library.alchemy.library import Library
+ from tagstudio.core.media_types import MediaType
+@@ -98,6 +100,28 @@ class PreviewThumbView(QWidget):
+         self.__media_player_page = QWidget()
+         self.__stacked_page_setup(self.__media_player_page, self.__media_player)
+ 
++        # Text / Markdown preview ==============================================
++        # Note: We keep this in the same stacked layout so the preview panel can
++        # switch to rich text for markdown instead of an image thumbnail.
++        self.__text_browser = QTextBrowser()
++        # We'll handle links ourselves (local-only) via anchorClicked.
++        self.__text_browser.setOpenExternalLinks(False)
++        self.__text_browser.setReadOnly(True)
++        self.__text_browser.setFrameShape(QLabel().frameShape())  # keep consistent w/ other pages
++        self.__text_browser.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
++        # Default to wrapping at the widget width.
++        self.__text_browser.setLineWrapMode(QTextBrowser.LineWrapMode.WidgetWidth)
++        self.__text_browser.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
++        self.__text_browser.addAction(open_file_action)
++        self.__text_browser.addAction(open_explorer_action)
++        self.__text_browser.addAction(delete_action)
++
++        # Local-only anchor handler (connected once).
++        self.__text_browser.anchorClicked.connect(self.__on_text_anchor_clicked)
++
++        self.__text_page = QWidget()
++        self.__stacked_page_setup(self.__text_page, self.__text_browser)
++
+         self.__thumb_renderer = ThumbRenderer(driver)
+         self.__thumb_renderer.updated.connect(self.__thumb_renderer_updated_callback)
+         self.__thumb_renderer.updated_ratio.connect(self.__thumb_renderer_updated_ratio_callback)
+@@ -105,6 +129,7 @@ class PreviewThumbView(QWidget):
+         self.__image_layout.addWidget(self.__preview_img_page)
+         self.__image_layout.addWidget(self.__preview_gif_page)
+         self.__image_layout.addWidget(self.__media_player_page)
++        self.__image_layout.addWidget(self.__text_page)
+ 
+         self.setMinimumSize(*self.__img_button_size)
+ 
+@@ -174,6 +199,11 @@ class PreviewThumbView(QWidget):
+         self.__media_player.setMaximumSize(adj_size)
+         self.__media_player.setMinimumSize(adj_size)
+ 
++        # Text/Markdown preview should use the full available area (no aspect ratio).
++        full_size = QSize(int(size[0]), int(size[1]))
++        self.__text_browser.setMinimumSize(full_size)
++        self.__text_browser.setMaximumSize(full_size)
++
+         proxy_style = RoundedPixmapStyle(radius=8)
+         self.__preview_gif.setStyle(proxy_style)
+         self.__media_player.setStyle(proxy_style)
+@@ -189,6 +219,19 @@ class PreviewThumbView(QWidget):
+             self.__media_player.stop()
+             self.__media_player.hide()
+ 
++        # If showing text, hide image wrapper and gifs.
++        if preview == MediaType.TEXT:
++            self.__button_wrapper.hide()
++            if self.__preview_gif.movie():
++                self.__preview_gif.movie().stop()
++                self.__gif_buffer.close()
++            self.__preview_gif.hide()
++            self.__text_browser.show()
++            self.__image_layout.setCurrentWidget(self.__text_page)
++            return
++        else:
++            self.__text_browser.hide()
++
+         if preview in [MediaType.IMAGE, MediaType.AUDIO]:
+             self.__button_wrapper.show()
+             self.__image_layout.setCurrentWidget(
+@@ -293,10 +336,95 @@ class PreviewThumbView(QWidget):
+         self.__switch_preview(MediaType.IMAGE)
+         self.__render_thumb(filepath)
+ 
++    def __on_text_anchor_clicked(self, url) -> None:
++        """Open only local file links from markdown/text preview."""
++        qurl = url if isinstance(url, QUrl) else QUrl(str(url))
++        scheme = (qurl.scheme() or "").lower()
++        if scheme in {"", "file"}:
++            QDesktopServices.openUrl(qurl)
++
++    def _display_text(
++        self,
++        text: str,
++        is_markdown: bool = False,
++        source_filepath: Path | None = None,
++    ) -> FileAttributeData:
++        """Display plaintext or markdown in a scrollable, wrapped widget.
++
++        Args:
++            text: The text contents to display.
++            is_markdown: If True, render as markdown.
++            source_filepath: If provided, used to resolve relative links/images.
++        """
++        self.__switch_preview(MediaType.TEXT)
++
++        # Resolve relative links/images against the markdown file location.
++        if source_filepath is not None:
++            base_url = QUrl.fromLocalFile(str(source_filepath.parent) + "/")
++            self.__text_browser.document().setBaseUrl(base_url)
++        else:
++            self.__text_browser.document().setBaseUrl(QUrl())
++
++        # Block loading remote resources for now.
++        def _accept_url(url):
++            qurl = url if isinstance(url, QUrl) else QUrl(str(url))
++            scheme = (qurl.scheme() or "").lower()
++            return scheme in {"", "file"}
++
++
++        # Filter resource loads (images) to local only.
++        def _load_resource(type_, name):
++            # QTextBrowser calls into QTextDocument.loadResource; we can block remote here.
++            if not _accept_url(name):
++                return None
++
++            return QTextBrowser.loadResource(self.__text_browser, type_, name)
++
++        # Monkey-patch just this instance (simple + contained).
++        self.__text_browser.loadResource = _load_resource  # type: ignore[method-assign]
++
++        # Render markdown.
++        if is_markdown:
++            try:
++                html_body = md.markdown(
++                    text,
++                    extensions=[
++                        "extra",  # tables, fenced code, etc.
++                        "sane_lists",
++                    ],
++                    output_format="html5",
++                )
++            except Exception:
++                # Fallback: keep the previous simple image rewrite so at least images don't blow up.
++                html_body = _rewrite_md_images(text)
++
++            # Ensure images scale to the available width.
++            # - max-width:100% keeps within the column
++            # - height:auto preserves aspect ratio
++            # Also make pre blocks readable.
++            html = (
++                "<html><head><meta charset='utf-8'>"
++                "<style>"
++                "img{max-width:100%;height:auto;}"
++                "pre{white-space:pre-wrap;}"
++                "code{white-space:pre-wrap;}"
++                "</style></head>"
++                "<body style='margin:0; padding:0;'>"
++                + html_body
++                + "</body></html>"
++            )
++            self.__text_browser.setHtml(html)
++        else:
++            self.__text_browser.setPlainText(text)
++
++        return FileAttributeData()
++
+     def hide_preview(self) -> None:
+         """Completely hide the file preview."""
+         self.__switch_preview(None)
+         self.__filepath = None
++        self.__text_browser.clear()
++        self.__text_browser.document().setBaseUrl(QUrl())
+ 
+     @override
+     def resizeEvent(self, event: QResizeEvent) -> None:
+@@ -310,3 +438,22 @@ class PreviewThumbView(QWidget):
+     @property
+     def media_player(self) -> MediaPlayer:
+         return self.__media_player
++
++def _rewrite_md_images(markdown: str) -> str:
++    """Rewrite common markdown image syntax to HTML <img> tags.
++
++    This is a best-effort fallback used if full markdown -> HTML conversion fails.
++    """
++    _MD_IMAGE_PATTERN = re.compile(r"!\[([^]]*)]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)")
++
++    def repl(m: re.Match) -> str:
++        alt = m.group(1) or ""
++        src = m.group(2) or ""
++        title = m.group(3)
++        title_attr = f' title="{title}"' if title else ""
++        return (
++            f'<img src="{src}" alt="{alt}"{title_attr} '
++            'style="max-width:100%; height:auto;" />'
++        )
++
++    return _MD_IMAGE_PATTERN.sub(repl, markdown)
+\ No newline at end of file
+diff --git a/tests/qt/test_markdown_preview.py b/tests/qt/test_markdown_preview.py
+new file mode 100644
+index 0000000..db2cf98
+--- /dev/null
++++ b/tests/qt/test_markdown_preview.py
+@@ -0,0 +1,178 @@
++import os
++from pathlib import Path
++from unittest.mock import patch
++
++from PIL import Image
++from pytestqt.qtbot import QtBot
++
++from tagstudio.core.library.alchemy.library import Library
++from tagstudio.qt.controllers.preview_thumb_controller import PreviewThumb
++from tagstudio.qt.ts_qt import QtDriver
++
++
++os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
++
++
++def _make_test_png(path: Path) -> None:
++    path.parent.mkdir(parents=True, exist_ok=True)
++    im = Image.new("RGBA", (10, 10), (255, 0, 0, 255))
++    im.save(path)
++
++
++def test_markdown_preview_uses_text_widget(qtbot: QtBot, tmp_path: Path):
++    """Markdown files should be previewed as wrapped, scrollable text (not an image thumbnail)."""
++
++    md_path = tmp_path / "example.md"
++    md_path.write_text("# Title\n\nSome **bold** text.\n", encoding="utf-8")
++
++    lib = Library()
++    assert lib.open_library(tmp_path, ":memory:").success
++
++    class Args:
++        settings_file = tmp_path / "settings.toml"
++        cache_file = tmp_path / "tagstudio.ini"
++        open = tmp_path
++        ci = True
++
++    with patch("tagstudio.qt.ts_qt.Consumer"), patch("tagstudio.qt.ts_qt.CustomRunnable"):
++        driver = QtDriver(Args())  # pyright: ignore[reportArgumentType]
++        driver.lib = lib
++
++        widget = PreviewThumb(lib, driver)
++        qtbot.addWidget(widget)
++
++        widget.display_file(md_path)
++
++        text = widget._PreviewThumbView__text_browser.toPlainText()  # type: ignore[attr-defined]
++        assert "Title" in text
++        assert "bold" in text
++
++
++def test_markdown_preview_relative_images_load_from_disk(qtbot: QtBot, tmp_path: Path):
++    """Relative markdown images like ![](./img.png) should resolve against the md file's folder."""
++
++    img_path = tmp_path / "assets" / "img.png"
++    _make_test_png(img_path)
++
++    md_path = tmp_path / "doc.md"
++    md_path.write_text("# Doc\n\n![](./assets/img.png)\n", encoding="utf-8")
++
++    lib = Library()
++    assert lib.open_library(tmp_path, ":memory:").success
++
++    class Args:
++        settings_file = tmp_path / "settings.toml"
++        cache_file = tmp_path / "tagstudio.ini"
++        open = tmp_path
++        ci = True
++
++    with patch("tagstudio.qt.ts_qt.Consumer"), patch("tagstudio.qt.ts_qt.CustomRunnable"):
++        driver = QtDriver(Args())  # pyright: ignore[reportArgumentType]
++        driver.lib = lib
++
++        widget = PreviewThumb(lib, driver)
++        qtbot.addWidget(widget)
++
++        widget.display_file(md_path)
++
++        browser = widget._PreviewThumbView__text_browser  # type: ignore[attr-defined]
++        doc = browser.document()
++
++        # Verify the image resource got loaded.
++        from PySide6.QtCore import QUrl
++        from PySide6.QtGui import QTextDocument
++
++        # With baseUrl set, this relative URL should be resolvable.
++        url = QUrl("assets/img.png")
++        resource = doc.resource(QTextDocument.ResourceType.ImageResource, url)
++        assert resource is not None
++
++
++def test_markdown_preview_large_images_are_scaled_down(qtbot: QtBot, tmp_path: Path):
++    """Large embedded images should be constrained to the preview width."""
++
++    # Create a very wide image.
++    img_path = tmp_path / "assets" / "wide.png"
++    img_path.parent.mkdir(parents=True, exist_ok=True)
++    Image.new("RGBA", (2000, 200), (0, 255, 0, 255)).save(img_path)
++
++    md_path = tmp_path / "doc.md"
++    md_path.write_text("# Doc\n\n![](./assets/wide.png)\n", encoding="utf-8")
++
++    lib = Library()
++    assert lib.open_library(tmp_path, ":memory:").success
++
++    class Args:
++        settings_file = tmp_path / "settings.toml"
++        cache_file = tmp_path / "tagstudio.ini"
++        open = tmp_path
++        ci = True
++
++    with patch("tagstudio.qt.ts_qt.Consumer"), patch("tagstudio.qt.ts_qt.CustomRunnable"):
++        driver = QtDriver(Args())  # pyright: ignore[reportArgumentType]
++        driver.lib = lib
++
++        widget = PreviewThumb(lib, driver)
++        qtbot.addWidget(widget)
++
++        # Give the browser a deterministic size so we can assert scaling.
++        widget.resize(500, 500)
++        widget.show()
++        qtbot.waitExposed(widget)
++
++        widget.display_file(md_path)
++
++        browser = widget._PreviewThumbView__text_browser  # type: ignore[attr-defined]
++
++        # Verify the *rendered* image size fits the viewport.
++        from PySide6.QtGui import QTextCursor, QTextImageFormat
++
++        doc = browser.document()
++        cursor = QTextCursor(doc)
++        found_width = None
++
++        while not cursor.atEnd():
++            fmt = cursor.charFormat()
++            if fmt.isImageFormat():
++                img_fmt = QTextImageFormat(fmt)
++                found_width = img_fmt.width()
++                break
++            cursor.movePosition(QTextCursor.MoveOperation.NextCharacter)
++
++        assert found_width is not None
++        assert found_width <= browser.viewport().width()
++
++
++def test_markdown_preview_expands_to_available_space(qtbot: QtBot, tmp_path: Path):
++    """Text/markdown preview should expand with the preview panel size."""
++
++    md_path = tmp_path / "example.md"
++    md_path.write_text("# Title\n\nSome text\n", encoding="utf-8")
++
++    lib = Library()
++    assert lib.open_library(tmp_path, ":memory:").success
++
++    class Args:
++        settings_file = tmp_path / "settings.toml"
++        cache_file = tmp_path / "tagstudio.ini"
++        open = tmp_path
++        ci = True
++
++    with patch("tagstudio.qt.ts_qt.Consumer"), patch("tagstudio.qt.ts_qt.CustomRunnable"):
++        driver = QtDriver(Args())  # pyright: ignore[reportArgumentType]
++        driver.lib = lib
++
++        widget = PreviewThumb(lib, driver)
++        qtbot.addWidget(widget)
++
++        widget.resize(700, 400)
++        widget.show()
++        qtbot.waitExposed(widget)
++
++        widget.display_file(md_path)
++
++        browser = widget._PreviewThumbView__text_browser  # type: ignore[attr-defined]
++        # Leave tolerance for layout margins.
++        assert browser.width() >= 500
++        assert browser.height() >= 250
++

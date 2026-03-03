@@ -113,6 +113,22 @@ class PreviewThumb(PreviewThumbView):
 
         ext = filepath.suffix.lower()
 
+        # Markdown and Plaintext Files
+        if MediaCategories.PLAINTEXT_TYPES.contains(ext, mime_fallback=True):
+            try:
+                from tagstudio.qt.previews.renderer import detect_char_encoding
+
+                encoding = detect_char_encoding(filepath)
+                with open(filepath, encoding=encoding, errors="replace") as f:
+                    text = f.read(256_000)
+            except Exception as e:
+                logger.error("[PreviewThumb] Could not load text file", filepath=filepath, error=e)
+                text = ""
+
+            is_markdown = ext in {".md", ".markdown", ".mkd", ".rmd"}
+            self._display_text(text, is_markdown=is_markdown, source_filepath=filepath)
+            return FileAttributeData()
+
         # Video
         if MediaCategories.VIDEO_TYPES.contains(ext, mime_fallback=True) and is_readable_video(
             filepath
